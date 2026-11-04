@@ -1,50 +1,46 @@
-# Android Mobile Application Automation Framework
+# Android Mobile Automation Framework
 
-An Android UI automation framework built with Python, Appium, Selenium
-WebDriver, Pytest, UiAutomator2, and the Page Object Model (POM).
+Python-based Android UI automation using **Appium**, **Selenium WebDriver**,
+**Pytest**, **UiAutomator2**, and the **Page Object Model (POM)**.
 
-This project automates the publicly available **Sauce Labs My Demo App**
-sample application. It does **not** test Atomberg's actual application and
-does not create or modify an Android application.
+> **Application under test:** Sauce Labs My Demo App sample application.  
+> This portfolio project does **not** test Atomberg's application.
 
-## Project overview
+## Third-Party Materials
 
-The framework provides a maintainable structure for testing an Android
-application through Appium. It centralizes driver configuration, separates
-screen interactions into page objects, uses explicit waits, creates an
-isolated driver session per test, and captures screenshots when test
-assertions fail.
+Sauce Labs My Demo App is used as the application under test. Its APK and
+application assets are third-party materials and are not distributed in this
+repository. This repository's MIT License applies only to the original
+framework code and project materials authored here; it does not cover the
+sample application or its third-party APK, branding, images, UI assets, or
+dependencies.
 
-The current implementation targets a Windows development environment with a
-Pixel 6 Android emulator, but the device name, UDID, Appium URL, platform
-version, package name, and local APK path can be configured through
-environment variables.
+## Overview
 
-## Problem statement
+This framework demonstrates a maintainable approach to Android UI testing:
 
-Mobile UI tests become difficult to maintain when driver setup, locators,
-screen actions, assertions, and failure handling are mixed together. This
-project addresses that problem with:
+- Centralized, environment-configurable Appium driver setup.
+- Function-scoped Pytest driver sessions with teardown.
+- Page objects that separate screen interactions from test assertions.
+- Explicit waits with implicit waits disabled.
+- Login, catalogue, product-details, navigation, and logout coverage.
+- Failure screenshots captured during failed test call phases.
+- Built-in Pytest JUnit XML reporting.
 
-- Centralized Appium driver creation.
-- Reusable Page Object Model classes.
-- Function-scoped Pytest driver sessions.
-- Explicit waits instead of broad implicit waits.
-- Assertions that verify observed application behavior.
-- JUnit XML output using Pytest's built-in reporting support.
-- Failure screenshots stored locally for investigation.
+The verified local setup uses a Pixel 6 Android emulator. The framework is
+configured for emulator-based execution and does not claim cloud, CI/CD,
+parallel, cross-platform, or real-device execution.
 
 ## Objectives
 
-- Verify that the Android application launches.
-- Validate the product catalogue and product information.
-- Exercise the sample application's login workflows.
-- Verify locked-out and empty-credential behavior.
-- Verify menu navigation, product details navigation, and logout.
-- Demonstrate a modular framework suitable for an entry-level QA automation
-  portfolio.
+- Verify application launch and the initial product catalogue.
+- Validate the sample application's supported login states.
+- Verify product names, prices, and product-details navigation.
+- Exercise the unauthenticated and authenticated navigation menus.
+- Demonstrate practical, reusable QA automation skills through a portfolio
+  project.
 
-## Technologies and tools
+## Technology stack
 
 | Technology | Version or purpose |
 |---|---|
@@ -53,30 +49,60 @@ project addresses that problem with:
 | Appium-Python-Client | 6.1.4 |
 | Selenium | 4.52.0 |
 | Pytest | 9.2.0 |
-| UiAutomator2 | Appium Android automation driver |
-| Android Emulator | Pixel 6 emulator, Android API 37 in the verified setup |
-| Page Object Model | Separates screen interactions from test assertions |
+| UiAutomator2 | Appium Android driver; verified driver 8.7.3 |
+| Android Emulator | Pixel 6, Android API 37 in the verified setup |
+| Architecture | Page Object Model |
 
-The exact Python dependencies are pinned in
+Python dependency versions are pinned in
 [requirements.txt](requirements.txt).
 
-## Framework architecture
+## Key features
 
-The test flow is organized as follows:
+- `utils/driver_setup.py` centralizes capabilities and configuration.
+- `conftest.py` creates and closes one driver session per test.
+- `pages/` contains Base, Home, Login, Menu, and Product page objects.
+- `tests/` contains application, login, catalogue, and navigation tests.
+- `WebDriverWait` provides explicit presence, visibility, and clickability
+  waits.
+- `full_reset=True` isolates tests by resetting the application per session.
+- Failed test call phases produce timestamped PNG screenshots.
+- JUnit XML is generated with Pytest; no extra reporting dependency is used.
 
-1. `utils/driver_setup.py` creates a configured UiAutomator2 Appium session.
-2. `conftest.py` provides a function-scoped `driver` fixture.
-3. Each test receives a new session and the application is fully reset.
-4. Page objects expose screen actions and reusable waits.
-5. Test modules perform workflow steps and make assertions.
-6. The Pytest hook saves a screenshot when a test call phase fails.
+## Portfolio Screenshots
 
-The driver uses an explicit-wait approach and sets the Appium driver's
-implicit wait to zero. The default explicit wait in `BasePage` is 15 seconds;
-the logout assertion uses a 30-second page-object timeout because the
-post-confirmation transition can take longer.
+### Product catalogue
 
-## Project directory structure
+![Sauce Labs My Demo App product catalogue](docs/images/product-catalogue.png)
+
+### Product details
+
+![Sauce Labs My Demo App product details](docs/images/product-details.png)
+
+### Test execution
+
+![Latest Pytest execution showing nine passing tests](docs/images/test-execution.png)
+
+## Page Object Model architecture
+
+```text
+Test modules
+    |
+    +-- Page objects (screen actions and locators)
+    |       +-- BasePage
+    |       +-- HomePage
+    |       +-- LoginPage
+    |       +-- MenuPage
+    |       +-- ProductPage
+    |
+    +-- conftest.py (driver fixture and failure screenshots)
+            |
+            +-- utils/driver_setup.py (Appium session configuration)
+```
+
+Tests own the workflow assertions. Page objects own the application
+interactions and verified locators.
+
+## Project structure
 
 ```text
 Appium-Mobile-Automation/
@@ -85,7 +111,7 @@ Appium-Mobile-Automation/
 ├── pages/
 │   ├── base_page.py             # Shared explicit-wait helpers
 │   ├── home_page.py             # Initial catalogue screen
-│   ├── login_page.py            # Login screen interactions
+│   ├── login_page.py            # Login interactions
 │   ├── menu_page.py             # Drawer, login, and logout interactions
 │   └── product_page.py          # Catalogue and product interactions
 ├── tests/
@@ -94,9 +120,9 @@ Appium-Mobile-Automation/
 │   └── test_navigation.py       # Catalogue and navigation tests
 ├── utils/
 │   └── driver_setup.py          # Centralized Appium configuration
-├── reports/                     # Local XML and UI inspection artifacts
-├── screenshots/                 # Local failure screenshots
-├── conftest.py                  # Driver fixture and screenshot hook
+├── reports/                     # Local generated reports; Git-ignored
+├── screenshots/                 # Local failure screenshots; Git-ignored
+├── conftest.py                  # Shared fixture and screenshot hook
 ├── inspect_ui.py                # UI hierarchy inspection utility
 ├── test_connection.py           # Standalone connection check
 ├── pytest.ini                   # Pytest configuration
@@ -105,80 +131,53 @@ Appium-Mobile-Automation/
 └── README.md
 ```
 
-## Implemented features
+The APK is not included in the repository. See [APK setup](#apk-setup).
 
-- Centralized Appium driver setup.
-- Configurable Appium server URL.
-- Configurable Android device name and UDID.
-- Configurable Android platform version.
-- Configurable application package and APK path.
-- UiAutomator2 capability configuration.
-- Full application reset for each test session.
-- Function-scoped driver fixture and teardown.
-- Base Page, Home Page, Login Page, Menu Page, and Product Page objects.
-- Explicit waits for element presence, visibility, and clickability.
-- Login, catalogue, product details, menu, and logout workflows.
-- Failure screenshot capture during failed test call phases.
-- Built-in JUnit XML report generation.
+## Automated test scenarios
 
-## Test scenarios
-
-| # | Scenario | Covered by |
+| # | Scenario | Test |
 |---:|---|---|
 | 1 | Verify the application launches with the expected package | `test_application_launches_successfully` |
-| 2 | Verify the product catalogue loads on a fresh launch | `test_product_catalogue_is_displayed_on_fresh_launch` |
-| 3 | Verify valid login using the application's saved sample user | `test_valid_saved_username_login` |
-| 4 | Verify locked-out user login is rejected and an error is visible | `test_locked_out_user_is_rejected` |
-| 5 | Verify submitting empty credentials keeps the Login screen open | `test_empty_credentials_do_not_leave_login_screen` |
-| 6 | Verify product list, titles, and prices are available | `test_product_catalogue_and_products_are_visible` |
-| 7 | Open product details and return with the Android Back action | `test_product_details_can_be_opened_and_closed` |
-| 8 | Open the unauthenticated menu and navigate to Login | `test_unauthenticated_menu_can_open_login` |
-| 9 | Confirm logout and verify return to the Login screen | `test_logout_returns_to_unauthenticated_state` |
+| 2 | Verify the product catalogue is visible after a fresh launch | `test_product_catalogue_is_displayed_on_fresh_launch` |
+| 3 | Verify valid login using the sample app's saved user option | `test_valid_saved_username_login` |
+| 4 | Verify the displayed locked-out user is rejected with an error | `test_locked_out_user_is_rejected` |
+| 5 | Verify empty submission remains on the Login screen | `test_empty_credentials_do_not_leave_login_screen` |
+| 6 | Verify product list, titles, and prices | `test_product_catalogue_and_products_are_visible` |
+| 7 | Open product details and return with Android Back | `test_product_details_can_be_opened_and_closed` |
+| 8 | Navigate from the unauthenticated menu to Login | `test_unauthenticated_menu_can_open_login` |
+| 9 | Confirm logout and verify return to Login | `test_logout_returns_to_unauthenticated_state` |
 
-The saved usernames are supplied by the sample application itself. The
-framework does not contain real-user credentials or personal information.
+The sample account choices are provided by the application itself. No
+real-user credentials or personal information are stored in this project.
 
 ## Prerequisites
 
-Install or configure the following before running the tests:
+Install or configure:
 
 1. Python 3.11.
 2. Android Studio.
 3. Android SDK Platform Tools, including `adb`.
-4. An Android emulator. The verified setup uses a Pixel 6 emulator with
-   Android API 37.
+4. An Android emulator. The verified setup uses a Pixel 6 with Android API
+   37.
 5. Appium Server 3.9.0.
 6. The Appium UiAutomator2 driver.
 7. An authorized local copy of the Sauce Labs My Demo App APK.
 
-The Android emulator and Appium server must be running before executing the
-Pytest suite.
+The emulator and Appium server must be running before Pytest execution.
 
-## Installation
+## Windows installation
 
-Open PowerShell and move to the project directory:
+Open PowerShell and change to the directory where you cloned this repository:
 
 ```powershell
-Set-Location "C:\Users\radhi\OneDrive\Desktop\Appium-Mobile-Automation"
+Set-Location "<clone-directory>"
 ```
 
-Create a virtual environment:
+Create and activate a virtual environment:
 
 ```powershell
 py -3.11 -m venv venv
-```
-
-Activate it:
-
-```powershell
 .\venv\Scripts\Activate.ps1
-```
-
-If PowerShell prevents script activation, review the local execution-policy
-settings or run the project with the virtual-environment interpreter directly:
-
-```powershell
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
 Install the pinned Python dependencies:
@@ -187,17 +186,17 @@ Install the pinned Python dependencies:
 python -m pip install -r requirements.txt
 ```
 
-## Android SDK and ADB configuration
+If PowerShell prevents activation, use the virtual-environment interpreter
+directly:
 
-The Android SDK location depends on the local Android Studio installation.
-A common Windows SDK path is:
-
-```text
-C:\Users\<your-user>\AppData\Local\Android\Sdk
+```powershell
+.\venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-For the current PowerShell session, configure the SDK variables with the
-actual path on your machine:
+## Android SDK and emulator setup
+
+Set the Android SDK variables for the current PowerShell session. Replace the
+placeholder with the SDK path on your machine:
 
 ```powershell
 $env:ANDROID_HOME = "C:\Users\<your-user>\AppData\Local\Android\Sdk"
@@ -205,41 +204,32 @@ $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 $env:Path += ";$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator"
 ```
 
-To persist the variables for future terminals, use `setx` with your actual
-SDK path, then open a new PowerShell window:
+To persist the variables for future terminals, use the actual SDK path and
+open a new PowerShell window afterward:
 
 ```powershell
 setx ANDROID_HOME "C:\Users\<your-user>\AppData\Local\Android\Sdk"
 setx ANDROID_SDK_ROOT "C:\Users\<your-user>\AppData\Local\Android\Sdk"
 ```
 
-Verify that ADB is available and that the emulator is connected:
+Start the emulator from Android Studio's Device Manager, then verify ADB:
 
 ```powershell
 adb version
 adb devices
-```
-
-The device must appear with a state such as `device`. The default framework
-UDID is `emulator-5554`, but it can be overridden with `ANDROID_UDID`.
-
-## Android emulator configuration
-
-Create or start the emulator from Android Studio's Device Manager. The
-verified project setup uses:
-
-- Device profile: Pixel 6.
-- Android API: 37.
-- Device name used by the default configuration: `Pixel_6`.
-- UDID used by the default configuration: `emulator-5554`.
-
-Confirm the emulator before starting tests:
-
-```powershell
-adb devices
 adb shell getprop ro.build.version.release
 adb shell getprop ro.build.version.sdk
 ```
+
+The default device configuration is:
+
+| Setting | Default |
+|---|---|
+| Device name | `Pixel_6` |
+| UDID | `emulator-5554` |
+| Verified Android API | `37` |
+
+The device should appear in `adb devices` with the state `device`.
 
 ## Appium server and UiAutomator2 setup
 
@@ -249,70 +239,63 @@ Start Appium Server in a separate PowerShell window:
 appium
 ```
 
-The framework default server URL is:
+The default server URL is:
 
 ```text
 http://127.0.0.1:4723
 ```
 
-Install the UiAutomator2 driver if it is not already installed:
+Install UiAutomator2 if it is not already installed:
 
 ```powershell
 appium driver install uiautomator2
-```
-
-List installed Appium drivers:
-
-```powershell
 appium driver list --installed
 ```
 
-Do not start the Pytest suite until the Appium server is listening and the
-Android emulator is visible through `adb devices`.
+The verified UiAutomator2 driver version is 8.7.3. Appium Server and the
+emulator must be running before starting the tests.
 
 ## APK setup
 
-The application under test is the Sauce Labs My Demo App with package:
+The application under test is the Sauce Labs My Demo App sample application:
 
 ```text
-com.saucelabs.mydemoapp.android
+Package: com.saucelabs.mydemoapp.android
 ```
 
-The APK is intentionally excluded from Git because redistribution permission
-for this sample application has not been verified. Obtain an authorized copy
-separately and do not assume that a publicly available APK may be
-redistributed.
+The APK is excluded from Git because redistribution permission has not been
+verified. Obtain an authorized copy separately; do not assume that a publicly
+available APK may be redistributed.
 
-The driver default is the repository-relative path:
+The driver default is a repository-relative path:
 
 ```text
 apps\my-demo-app.apk
 ```
 
-For a separately stored APK, configure `ANDROID_APP_PATH` before running:
+If the APK is stored elsewhere, configure its local path:
 
 ```powershell
 $env:ANDROID_APP_PATH = "C:\authorized\path\my-demo-app.apk"
 ```
 
-The path is read by `utils/driver_setup.py` and passed to Appium. The
-application package can also be overridden if an authorized compatible build
-uses a different package:
+The package can be overridden when required:
 
 ```powershell
 $env:ANDROID_APP_PACKAGE = "com.saucelabs.mydemoapp.android"
 ```
 
-## Configuration environment variables
+## Driver configuration
 
-The actual defaults in `utils/driver_setup.py` are:
+The actual environment variables and defaults in
+`utils/driver_setup.py` are:
 
 | Variable | Default |
 |---|---|
 | `APPIUM_SERVER_URL` | `http://127.0.0.1:4723` |
 | `ANDROID_DEVICE_NAME` | `Pixel_6` |
 | `ANDROID_UDID` | `emulator-5554` |
-| `ANDROID_PLATFORM_VERSION` | Empty; omitted from capabilities unless set |
+| `ANDROID_PLATFORM_VERSION` | Empty; omitted unless set |
 | `ANDROID_APP_PACKAGE` | `com.saucelabs.mydemoapp.android` |
 | `ANDROID_APP_PATH` | Project root plus `apps\my-demo-app.apk` |
 
@@ -330,90 +313,84 @@ $env:ANDROID_APP_PATH = "C:\authorized\path\my-demo-app.apk"
 ## Running the tests
 
 With the emulator running, the APK path configured, and Appium Server
-started in another terminal:
+listening:
 
 ```powershell
-Set-Location "C:\Users\radhi\OneDrive\Desktop\Appium-Mobile-Automation"
+Set-Location "<clone-directory>"
 .\venv\Scripts\Activate.ps1
 python -m pytest -v
 ```
 
-The `pytest.ini` file sets the test directory to `tests`, enables verbose
-output, uses short tracebacks, and enables live INFO-level logging.
+The `pytest.ini` configuration:
 
-The driver starts one Appium session per test, performs a full application
-reset, and calls `quit()` during fixture teardown. Because the application is
-reset for each test, the suite can take several minutes on an emulator.
+- Discovers tests under `tests`.
+- Enables verbose output.
+- Uses short tracebacks.
+- Enables live INFO-level logging.
 
-## Generating JUnit XML reports
+Each test receives a new Appium session. The fixture closes the session with
+`quit()` after the test, and the driver performs a full application reset for
+each session.
 
-Generate a JUnit XML report with Pytest's built-in reporting option:
+## Reports and failure screenshots
+
+Generate a JUnit XML report using Pytest's built-in reporting option:
 
 ```powershell
 python -m pytest -v --junitxml=reports/test-results.xml
 ```
 
-The report is written to `reports/test-results.xml`. Reports are generated
-artifacts and are excluded from Git by the current `.gitignore`.
+The generated report is written to `reports/test-results.xml`. Reports and
+screenshots are generated artifacts and are excluded from Git.
 
-The previously executed full run reported:
+When a test fails during its call phase, `conftest.py` captures a PNG under
+`screenshots/` and logs the generated path. Screenshots are not captured for
+every test and may contain application state, so review them before sharing
+publicly.
 
-```text
-9 passed in 161.28 seconds
-```
-
-This is a historical result for the verified local environment, not a
-guarantee that the suite will pass on every machine.
-
-## Failure screenshots
-
-The shared fixture in `conftest.py` captures a PNG screenshot when a test
-fails during its call phase. Screenshots are stored in:
+The latest verified execution result was:
 
 ```text
-screenshots/
+9 passed in 155.63 seconds
 ```
 
-The test name and timestamp are included in each generated filename. The
-fixture also logs the screenshot path. Screenshots are excluded from Git by
-default because they are generated artifacts and may contain application
-state or sample data.
+This result was recorded in one configured environment and is not a guarantee
+that the suite will pass on every machine.
 
 ## Troubleshooting
 
-### Appium server connection fails
+### Appium connection failure
 
-Confirm that Appium is running and listening on the configured URL:
+Confirm that the server is running:
 
 ```powershell
 appium
 ```
 
-If the server uses another URL, update `APPIUM_SERVER_URL`.
+If it uses another URL, set `APPIUM_SERVER_URL`.
 
-### No Android device is detected
+### Device is not detected
 
 ```powershell
 adb devices
 ```
 
-Start the emulator, confirm that its state is `device`, and set
-`ANDROID_UDID` to the actual device identifier.
+Start the emulator, wait for the `device` state, and set `ANDROID_UDID` to
+the actual identifier if it differs from the default.
 
 ### `adb` is not recognized
 
-Confirm that `ANDROID_HOME` and `ANDROID_SDK_ROOT` point to the Android SDK,
-and that `platform-tools` is included in `PATH`. Open a new PowerShell window
-after using `setx`.
+Verify `ANDROID_HOME`, `ANDROID_SDK_ROOT`, and the `platform-tools` entry in
+`PATH`. Open a new PowerShell window after using `setx`.
 
-### UiAutomator2 driver is unavailable
+### UiAutomator2 is unavailable
 
 ```powershell
 appium driver install uiautomator2
 appium driver list --installed
 ```
 
-### APK path cannot be found
+### APK cannot be found
 
 Set `ANDROID_APP_PATH` to an authorized local APK:
 
@@ -421,38 +398,45 @@ Set `ANDROID_APP_PATH` to an authorized local APK:
 $env:ANDROID_APP_PATH = "C:\authorized\path\my-demo-app.apk"
 ```
 
-### Login or menu elements cannot be found
+### Locators cannot be found
 
-Confirm that the configured APK is the expected Sauce Labs My Demo App build.
-The framework locators were based on the inspected UI hierarchy for the
-sample application and are not intended for Atomberg or another application.
+Confirm that the APK is the expected Sauce Labs My Demo App build. The
+locators were based on the inspected UI hierarchy for this sample
+application and are not intended for Atomberg or another application.
 
 ## Limitations and future improvements
 
 Current limitations:
 
-- The framework targets the Sauce Labs My Demo App sample application only.
-- The APK must be obtained and stored locally by the user.
-- The verified setup uses an Android emulator; no real-device or cloud-device
-  execution is implemented.
-- Tests run sequentially through the standard Pytest execution model.
+- Targets the Sauce Labs My Demo App sample application only.
+- Requires an authorized local APK.
+- The verified setup uses an Android emulator only.
+- No real-device or cloud-device execution is implemented.
 - No parallel execution or cross-platform test matrix is configured.
 - No CI/CD workflow is included.
 - JUnit XML is supported; an HTML reporting plugin is not included.
-- Failure screenshots are captured for failed test call phases, not as a
-  general artifact-management system.
+- Screenshots are captured only for failed test call phases.
 
 Possible future improvements:
 
-- Add a reviewed HTML reporting dependency if HTML reports are required.
+- Add a reviewed HTML reporting dependency if required.
 - Add CI validation for compilation and Pytest collection.
-- Add a documented emulator-based CI strategy.
-- Improve configuration validation and startup diagnostics.
-- Add more product and navigation coverage based on verified application UI.
-- Add repository contribution, licensing, and issue-management documentation.
+- Document an emulator-based CI strategy.
+- Add configuration validation and clearer startup diagnostics.
+- Expand product and navigation coverage from verified UI behavior.
+- Add repository contribution and issue-management documentation.
 
-## Author information
+## Author and project information
 
-This repository is prepared as a QA automation portfolio project. Add the
-author's preferred name, GitHub profile, and contact details here before
-publishing the repository publicly.
+This is a portfolio project demonstrating Android UI automation and
+maintainable Pytest framework design.
+
+**Radhika Baigaru**
+
+- GitHub: [https://github.com/iradhika787](https://github.com/iradhika787)
+- LinkedIn: [https://linkedin.com/in/baigaru-radhika](https://linkedin.com/in/baigaru-radhika)
+
+The original framework code is separate from the Sauce Labs sample
+application, APK, third-party Python packages, and any application assets.
+Review the applicable licenses before redistributing those third-party
+materials.
